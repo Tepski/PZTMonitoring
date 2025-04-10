@@ -1,0 +1,19 @@
+{
+  "name": "electronquatro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run dev --prefix renderer",
+    "electron": "wait-on http://localhost:5173/ && npm start --prefix main",
+    "start": "concurrently \"npm run dev\" \"npm run electron\""
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "concurrently": "^9.1.2",
+    "electron": "^35.1.4",
+    "wait-on": "^8.0.3"
+  }
+}
