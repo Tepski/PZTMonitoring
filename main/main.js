@@ -24,8 +24,17 @@ app.whenReady().then(() => {
   createWindow();
 });
 
-ipcMain.handle("get-time", async () => {
-  return new Date().toLocaleString();
+// ipcMain.handle("get-time", async () => {
+//   return new Date().toLocaleString();
+// });
+
+ipcMain.handle("get-time", () => {
+  const timestamp = new Date();
+  const day = timestamp.toLocaleDateString();
+  const time = [timestamp.getHours(), timestamp.getMinutes()];
+  const date = timestamp.toLocaleString();
+
+  return { day, time, date };
 });
 
 app.on("window-all-closed", () => {

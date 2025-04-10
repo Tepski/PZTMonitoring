@@ -26,15 +26,15 @@ const tableDefault: (string | number)[][] = [
   ["Nightshift", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
-const tableTotalDefault: string[][] = [
+const tableTotalDefault: (string | number)[][] = [
   ["Dayshift", "NightShift"],
-  ["", ""],
+  [0, 0],
 ];
 
-const tableModelDefault: string[][] = [
+const tableModelDefault: (string | number)[][] = [
   ["", "HP", "5.3", "23W", "23A", "23P", "26MB", "15M"],
-  ["Dayshift", "", "", "", "", "", "", ""],
-  ["NightShift", "", "", "", "", "", "", ""],
+  ["Dayshift", 0, 0, 0, 0, 0, 0, 0],
+  ["NightShift", 0, 0, 0, 0, 0, 0, 0],
 ];
 
 function App() {
@@ -47,11 +47,11 @@ function App() {
   const [tableModel, setTableModel] = useState<(string | number)[][] | null>(
     tableModelDefault
   );
+  const [dayshift, setDayShift] = useState<boolean>(true);
 
-  const getTime = async (): Promise<string | void> => {
+  const getTime = async (): Promise<TimeProps | undefined> => {
     try {
       const res = await window.electronApi.getTime();
-
       return res;
     } catch {
       console.log("An error occured");
@@ -59,11 +59,21 @@ function App() {
   };
 
   useEffect(() => {
-    console.log(table);
-    const dateObj = new Date();
+    const interval = setInterval(() => {
+      getTime().then((time) => {
+        setDayShift(time?.time[0] == 18 ? false : true);
+      });
+    }, 1000);
 
-    // console.log("DATE: ", dateObj.toLocaleDateString());
-    console.log(dateObj.getTime())
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log(table);
+
+    getTime();
   }, [table]);
 
   return (
@@ -71,6 +81,7 @@ function App() {
       <TitleBar />
       <div className="container flex flex-col h-full w-[97%] pb-4">
         <Header
+          shift={dayshift}
           getTime={getTime}
           table={table}
           total={tableTotal}
@@ -79,8 +90,8 @@ function App() {
           setTotal={setTableTotal}
           setModel={setTableModel}
         />
-        <Output table={table} />
         <TotalOutput table={tableTotal} />
+        <Output table={table} />
         <PerModel table={tableModel} />
       </div>
     </div>

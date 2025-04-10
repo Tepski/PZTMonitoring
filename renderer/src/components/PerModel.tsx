@@ -4,7 +4,7 @@ interface ModelProps {
 
 const PerModel = ({ table }: ModelProps) => {
   return (
-    <div className="flex h-full flex-1/8 rounded-2xl shadow-sm shadow-black/60 overflow-hidden border-1 border-gray-800">
+    <div className="flex h-full flex-1/4 rounded-2xl shadow-sm shadow-black/60 overflow-hidden border-1 border-gray-800">
       <table className="w-full table-fixed text-gray-600">
         <thead className={`bg-blue-400/40 h-1/7 border-b-2 border-gray-300`}>
           <tr className="">
@@ -27,16 +27,16 @@ const PerModel = ({ table }: ModelProps) => {
           {table &&
             table.slice(1, 3)?.map((row, rowIndex) => {
               return (
-                <tr key={rowIndex.toString()} className={``}>
+                <tr key={rowIndex.toString()} className={` hover:bg-gray-100`}>
                   {row.map((col, colIndex) => {
                     return (
                       <td
                         key={colIndex.toString()}
-                        className={`${
+                        className={`border-r-1 border-gray-300 ${
                           colIndex == 0 ? "w-[10%] ps-4" : "text-center"
                         }`}
                       >
-                        {col}
+                        {col == 0 ? "" : col}
                       </td>
                     );
                   })}

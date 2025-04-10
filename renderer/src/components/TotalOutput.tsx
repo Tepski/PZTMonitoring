@@ -9,7 +9,7 @@ const TotalOutput = ({ table }: TotalProps) => {
   // ];
 
   return (
-    <div className=" my-2 flex justify-centes w-full flex-col h-full flex-1/4 border-1 border-gray-800 rounded-2xl shadow-sm shadow-black-50 border-b-2xl overflow-hidden">
+    <div className=" my-2 flex justify-centes w-full flex-col h-full flex-1/2 border-1 border-gray-800 rounded-2xl shadow-sm shadow-black-50 border-b-2xl overflow-hidden">
       <p className="text-4xl text-[#443838] py-4 font-semibold bg-blue-400/40 w-full text-center border-b-1 border-gray-800 rounded-t-2xl">
         Total Output
       </p>
@@ -23,14 +23,18 @@ const TotalOutput = ({ table }: TotalProps) => {
                   className={`text-center ${
                     rowIndex == 0
                       ? "font-semibold bg-gray-300 h-8 border-b-1 border-gray-800"
-                      : "h-auto font-bold text-2xl"
+                      : "h-auto font-bold text-7xl text-shadow-md text-shadow-black/50"
                   }`}
                 >
                   {row.map((cell, colIndex) => {
                     return (
                       <td
                         key={colIndex.toString()}
-                        className={`border-1 border-gray-300`}
+                        className={`border-1 border-gray-300 ${
+                          colIndex == 0 && rowIndex == 1
+                            ? "text-yellow-500"
+                            : "text-gray-500"
+                        }`}
                       >
                         {cell}
                       </td>

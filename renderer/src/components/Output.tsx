@@ -23,7 +23,7 @@ const Output = ({ table }: OutputProps) => {
   // }, [table]);
 
   return (
-    <div className="flex h-full flex-1/4 rounded-2xl overflow-hidden border-1 border-gray-800 shadow-sm shadow-black/50 bg-[#f7f7f7]">
+    <div className="flex h-full flex-1/4 rounded-2xl mb-2 overflow-hidden border-1 border-gray-800 shadow-sm shadow-black/50 bg-[#f7f7f7]">
       <table className="w-full table-fixed h-full">
         <thead className="bg-blue-400/40">
           <tr>

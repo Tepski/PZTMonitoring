@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback, ChangeEvent } from "react";
 
 interface HeaderProps {
-  getTime: () => Promise<string | void>;
+  shift: boolean;
+  getTime: () => Promise<TimeProps | undefined>;
   table: (string | number)[][] | null;
   total: (string | number)[][] | null;
   model: (string | number)[][] | null;
@@ -43,14 +44,8 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
   };
 
   const loggingTest = async (value: string | number) => {
-    const date: string | void = await getTime();
-    const timeArr = date?.split(" ");
-    // const meridiem = timeArr && timeArr[2];
-    const time = timeArr && timeArr[1].split(":")[0];
-
-    // if (meridiem?.toLowerCase() == "pm") {
-    //   time += 12;
-    // }
+    const date: TimeProps | undefined = await getTime();
+    const time = date?.time[0];
 
     if (table) {
       const newTable = [...table];
@@ -79,13 +74,17 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
     // loggingTest(finalData?.Quantity ?? "");
   }, [setScanned, setFinalData, finalData]);
 
+  // const handleLocalStorage = (): void => {
+  //   return
+  // }
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const time = window.electronApi.getTime();
 
     setFinalData((prev: FinalDataInterface) => ({
       ...prev,
       TrayNumber: e.target.value,
-      Timestamp: time,
+      Timestamp: time.date,
     }));
   };
 
