@@ -9,7 +9,7 @@ const TotalOutput = ({ table }: TotalProps) => {
   // ];
 
   return (
-    <div className=" my-2 flex justify-centes w-full flex-col h-full flex-1/2 border-1 border-gray-800 rounded-2xl shadow-sm shadow-black-50 border-b-2xl overflow-hidden">
+    <div className=" mb-2 flex justify-centes w-full flex-col h-full flex-1/2 border-1 border-gray-800 rounded-2xl shadow-sm shadow-black-50 border-b-2xl overflow-hidden">
       <p className="text-4xl text-[#443838] py-4 font-semibold bg-blue-400/40 w-full text-center border-b-1 border-gray-800 rounded-t-2xl">
         Total Output
       </p>

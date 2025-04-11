@@ -3,12 +3,12 @@ import { useState, useEffect, useRef, useCallback, ChangeEvent } from "react";
 interface HeaderProps {
   shift: boolean;
   getTime: () => Promise<TimeProps | undefined>;
-  table: (string | number)[][] | null;
-  total: (string | number)[][] | null;
-  model: (string | number)[][] | null;
-  setTable: React.Dispatch<React.SetStateAction<(string | number)[][] | null>>;
-  setTotal: React.Dispatch<React.SetStateAction<(string | number)[][] | null>>;
-  setModel: React.Dispatch<React.SetStateAction<(string | number)[][] | null>>;
+  table: tableProps | null;
+  total: totalProps | null;
+  model: tableProps | null;
+  setTable: React.Dispatch<React.SetStateAction<tableProps | null>>;
+  setTotal: React.Dispatch<React.SetStateAction<totalProps | null>>;
+  setModel: React.Dispatch<React.SetStateAction<tableProps | null>>;
 }
 
 interface FinalDataInterface {
@@ -23,7 +23,14 @@ const finalDataDefaultValue: FinalDataInterface = {
   Timestamp: "",
 };
 
-const Header = ({ getTime, setTable, table }: HeaderProps) => {
+const Header = ({
+  getTime,
+  setTable,
+  table,
+  total,
+  setTotal,
+  shift,
+}: HeaderProps) => {
   const ref = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -43,60 +50,84 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
     ref.current?.focus();
   };
 
-  const loggingTest = async (value: string | number) => {
+  const loggingFunc = async (value: string | number) => {
     const date: TimeProps | undefined = await getTime();
     const time = date?.time[0];
 
     if (table) {
-      const newTable = [...table];
-      newTable[1][Number(time) + 7] = value;
-
-      console.log(newTable[1][Number(time)]);
+      const newTable: tableProps = [...table];
+      const index = Number(time) - 5;
+      newTable[1][index] += value;
 
       setTable(() => {
         return newTable;
       });
     }
+
+    if (total) {
+      const newTotal: totalProps = [...total];
+      const index = shift ? 0 : 1;
+      if (typeof newTotal[1][index] === "number") {
+        let updatedTotal = table
+          ? (newTotal[1][index] as unknown as number)
+          : 0;
+        updatedTotal = updatedTotal + (value as number);
+        newTotal[1][index] = updatedTotal;
+        setTotal(() => {
+          return newTotal;
+        });
+      }
+    }
   };
+
+  const enterDeps = [setScanned, setFinalData, finalData];
 
   const handleEnter = useCallback(() => {
     setScanned((prev) => !prev);
 
-    loggingTest(Number(finalData?.Quantity ?? ""));
+    loggingFunc(Number(finalData?.Quantity ?? ""));
 
     setFinalData((prev) => ({
       ...prev,
       TrayNumber: "",
     }));
 
-    console.log(table);
-
-    // loggingTest(finalData?.Quantity ?? "");
-  }, [setScanned, setFinalData, finalData]);
+    // loggingFunc(finalData?.Quantity ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, enterDeps);
 
   // const handleLocalStorage = (): void => {
   //   return
   // }
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const time = window.electronApi.getTime();
+  const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const time: TimeProps | undefined = await getTime();
 
     setFinalData((prev: FinalDataInterface) => ({
       ...prev,
       TrayNumber: e.target.value,
-      Timestamp: time.date,
+      Timestamp: time?.day as string,
     }));
+
+    console.log(time?.day);
   };
 
   const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFinalData((prev) => ({ ...prev, Quantity: e.target.value }));
   };
 
+  // const handleLocalStorage = (data: FinalDataInterface) => {
+  //   const time: TimeProps = getTime();
+  //   const tempData = {
+  //     inputTime: `${time.time[0]}:${time.time[1]}`
+  //     inputData: data
+  //   }
+  //   localStorage.setItem(time.day, )
+  // }
+
   useEffect(() => {
     const scannerListener = (e: KeyboardEvent) => {
       if (e.key == "ArrowDown") {
-        console.log("Shift clicked", finalData?.TrayNumber);
-
         setScanned((prev) => !prev);
       }
     };
@@ -111,8 +142,6 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
 
   useEffect(() => {
     if (scanned) {
-      console.log("scanned");
-
       inputRef.current?.focus();
 
       const modalRefListener = (k: KeyboardEvent) => {
@@ -151,7 +180,7 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
 
         <button
           className="bg-blue-500 mx-2 px-2 py-1 border-2 border-blue-500 shadow-md active:bg-blue-600 rounded-md hover:cursor-pointer text-white"
-          onClick={() => loggingTest(finalData?.Quantity ?? "")}
+          onClick={() => loggingFunc(finalData?.Quantity ?? "")}
         >
           Download Report
         </button>
@@ -177,7 +206,7 @@ const Header = ({ getTime, setTable, table }: HeaderProps) => {
             />
 
             <div className="flex items-center w-full flex-col text-lg text-gray-500 py-4 gap-4">
-              <div className="flex w-full justify-between">
+              <div className="flex w-full justify-between items-center">
                 <p className="font-semibold">TrayNumber: </p>
                 <p className="text-sm">
                   {finalData?.TrayNumber ? finalData.TrayNumber : "N17252"}

@@ -12,4 +12,7 @@ declare global {
       getTime: () => TimeProps;
     };
   }
+
+  type tableProps = [string[], [string, ...number], [string, ...number]];
+  type totalProps = [string[], number[]]
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import Header from "./components/Header";
 import TitleBar from "./components/TitleBar";
@@ -6,7 +6,7 @@ import Output from "./components/Output";
 import TotalOutput from "./components/TotalOutput";
 import PerModel from "./components/PerModel";
 
-const tableDefault: (string | number)[][] = [
+const tableDefault: tableProps = [
   [
     "",
     "06:00-07:00",
@@ -26,25 +26,23 @@ const tableDefault: (string | number)[][] = [
   ["Nightshift", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
-const tableTotalDefault: (string | number)[][] = [
+const tableTotalDefault: totalProps = [
   ["Dayshift", "NightShift"],
   [0, 0],
 ];
 
-const tableModelDefault: (string | number)[][] = [
+const tableModelDefault: tableProps = [
   ["", "HP", "5.3", "23W", "23A", "23P", "26MB", "15M"],
   ["Dayshift", 0, 0, 0, 0, 0, 0, 0],
   ["NightShift", 0, 0, 0, 0, 0, 0, 0],
 ];
 
 function App() {
-  const [table, setTable] = useState<(string | number)[][] | null>(
-    tableDefault
-  );
-  const [tableTotal, setTableTotal] = useState<(string | number)[][] | null>(
+  const [table, setTable] = useState<tableProps | null>(tableDefault);
+  const [tableTotal, setTableTotal] = useState<totalProps | null>(
     tableTotalDefault
   );
-  const [tableModel, setTableModel] = useState<(string | number)[][] | null>(
+  const [tableModel, setTableModel] = useState<tableProps | null>(
     tableModelDefault
   );
   const [dayshift, setDayShift] = useState<boolean>(true);
@@ -70,11 +68,37 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(table);
+  const updateTableOnChangeShift = useCallback(() => {
+    const newTable: tableProps = table ? [...table] : tableDefault;
+    const nsTable = [""];
 
-    getTime();
-  }, [table]);
+    const handleTime = (x: number): string => {
+      let timer: string = "";
+      if (x >= 24) {
+        timer = `0${x - 24}`;
+      } else {
+        timer = String(x);
+      }
+
+      return timer;
+    };
+
+    for (let i = 18; i < 30; i++) {
+      const time = `${handleTime(i)}:00-${handleTime(i + 1)}:00`;
+      nsTable.push(time);
+    }
+
+    newTable[0] = nsTable;
+
+    setTable(newTable);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setTable]);
+
+  useEffect(() => {
+    if (!dayshift) {
+      updateTableOnChangeShift();
+    }
+  }, [dayshift, updateTableOnChangeShift]);
 
   return (
     <div className="flex h-[100vh] w-[100vw] flex-col items-center select-none relative">
