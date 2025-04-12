@@ -56,7 +56,58 @@ function App() {
     }
   };
 
+  const getLocalItem = (key: string): localItemProps | null => {
+    const data: string | null = localStorage.getItem(key);
+    if (data) {
+      const parsedData = JSON.parse(data) as localItemProps;
+
+      return parsedData;
+    } else {
+      return null;
+    }
+  };
+
+  const applyValues = async () => {
+    const time: TimeProps | undefined = await getTime();
+
+    const data = time ? getLocalItem(time.day) : null;
+
+    if (data) {
+      if (table) {
+        const newTable = [...table];
+        newTable[1] = data.table[0];
+        newTable[2] = data.table[1];
+
+        setTable(newTable as tableProps);
+        console.log(data.table);
+      }
+
+      if (tableTotal) {
+        const newTable = [...tableTotal];
+        newTable[1] = data.total;
+
+        setTableTotal(newTable as totalProps);
+      }
+
+      if (tableModel) {
+        const newTable = [...tableModel];
+        newTable[1] = data.model[0];
+        newTable[2] = data.model[1];
+
+        setTableModel(newTable as tableProps);
+      }
+
+      console.log(data);
+    } else {
+      setTable(tableDefault);
+      setTableTotal(tableTotalDefault);
+      setTableModel(tableModelDefault);
+    }
+  };
+
   useEffect(() => {
+    applyValues();
+
     const interval = setInterval(() => {
       getTime().then((time) => {
         setDayShift(time?.time[0] == 18 ? false : true);

@@ -28,6 +28,7 @@ const Header = ({
   setTable,
   table,
   total,
+  model,
   setTotal,
   shift,
 }: HeaderProps) => {
@@ -78,6 +79,17 @@ const Header = ({
         });
       }
     }
+
+    const dataToStore = {
+      table: table ? [table[1], table[2]] : null,
+      total: total ? total[1] : null,
+      model: model ? [model[1], model[2]] : null,
+      hourly: finalData ? finalData : null,
+    };
+
+    const stringed = JSON.stringify(dataToStore);
+
+    setToLocal(stringed);
   };
 
   const enterDeps = [setScanned, setFinalData, finalData];
@@ -87,10 +99,14 @@ const Header = ({
 
     loggingFunc(Number(finalData?.Quantity ?? ""));
 
-    setFinalData((prev) => ({
-      ...prev,
-      TrayNumber: "",
-    }));
+    // setFinalData((prev) => ({
+    //   ...prev,
+    //   TrayNumber: "",
+    // }));
+
+    if (ref.current) {
+      ref.current.value = "";
+    }
 
     // loggingFunc(finalData?.Quantity ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,22 +124,18 @@ const Header = ({
       TrayNumber: e.target.value,
       Timestamp: time?.day as string,
     }));
+  };
 
-    console.log(time?.day);
+  const setToLocal = async (value: string) => {
+    const time: TimeProps | undefined = await getTime();
+    localStorage.setItem(time ? time.day : "", value);
+
+    console.log(value);
   };
 
   const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFinalData((prev) => ({ ...prev, Quantity: e.target.value }));
   };
-
-  // const handleLocalStorage = (data: FinalDataInterface) => {
-  //   const time: TimeProps = getTime();
-  //   const tempData = {
-  //     inputTime: `${time.time[0]}:${time.time[1]}`
-  //     inputData: data
-  //   }
-  //   localStorage.setItem(time.day, )
-  // }
 
   useEffect(() => {
     const scannerListener = (e: KeyboardEvent) => {
@@ -164,10 +176,10 @@ const Header = ({
         <input
           ref={ref}
           type="text"
-          value={finalData?.TrayNumber ?? ""}
+          // value={finalData && finalData.TrayNumber}
           onChange={(e) => handleChange(e)}
           className="border-2 px-2 py-1 rounded-md caret-transparent"
-          placeholder="Scan Tray Barcode"
+          placeholder="Scan JO Batch Barcode"
         />
       </div>
 

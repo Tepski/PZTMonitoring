@@ -13,7 +13,16 @@ const createWindow = () => {
     // fullscreen: true,
   });
 
+  const buildPath = path.join(
+    __dirname,
+    "..",
+    "renderer",
+    "dist",
+    "index.html"
+  );
+
   win.maximize();
+  // win.loadFile(buildPath);
   win.loadURL("http://localhost:5173/");
 
   // const customeMenu = Menu.buildFromTemplate([]);
