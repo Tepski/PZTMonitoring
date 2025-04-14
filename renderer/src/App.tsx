@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 
 import Header from "./components/Header";
-import TitleBar from "./components/TitleBar";
 import Output from "./components/Output";
 import TotalOutput from "./components/TotalOutput";
 import PerModel from "./components/PerModel";
+
+// Use colors #ebebeb and #daebec
 
 const tableDefault: tableProps = [
   [
@@ -67,10 +68,10 @@ function App() {
     }
   };
 
-  const applyValues = async () => {
+  const applyValues = useCallback(async () => {
     const time: TimeProps | undefined = await getTime();
 
-    const data = time ? getLocalItem(time.day) : null;
+    const data = time ? getLocalItem(time.localStorageDate) : null;
 
     if (data) {
       if (table) {
@@ -79,7 +80,6 @@ function App() {
         newTable[2] = data.table[1];
 
         setTable(newTable as tableProps);
-        console.log(data.table);
       }
 
       if (tableTotal) {
@@ -96,14 +96,12 @@ function App() {
 
         setTableModel(newTable as tableProps);
       }
-
-      console.log(data);
     } else {
       setTable(tableDefault);
       setTableTotal(tableTotalDefault);
       setTableModel(tableModelDefault);
     }
-  };
+  }, [table, tableModel, tableTotal]);
 
   useEffect(() => {
     applyValues();
@@ -117,7 +115,7 @@ function App() {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [applyValues]);
 
   const updateTableOnChangeShift = useCallback(() => {
     const newTable: tableProps = table ? [...table] : tableDefault;
@@ -152,9 +150,14 @@ function App() {
   }, [dayshift, updateTableOnChangeShift]);
 
   return (
-    <div className="flex h-[100vh] w-[100vw] flex-col items-center select-none relative">
-      <TitleBar />
-      <div className="container flex flex-col h-full w-[97%] pb-4">
+    <div className="flex h-[100vh] w-[100vw] flex-col items-center select-none relative bg-gradient-to-rs from-[#e5e7e4]s to-[#daebec]s">
+      <div className="w-full h-full bg-red-200/40 absolute top-0 left-0 flex z-0">
+        <div className="h-full w-2/5 bg-[#e5e7e4]"></div>
+        <div className="h-full w-1/5 bg-gradient-to-r from-[#e5e7e4] to-[#daebec]"></div>
+        <div className="h-full w-2/5 bg-[#daebec]"></div>
+      </div>
+      {/* <TitleBar /> */}
+      <div className="container flex flex-col h-full w-[97%] pb-4 z-10">
         <Header
           shift={dayshift}
           getTime={getTime}

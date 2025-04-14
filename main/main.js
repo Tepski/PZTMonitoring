@@ -25,8 +25,8 @@ const createWindow = () => {
   // win.loadFile(buildPath);
   win.loadURL("http://localhost:5173/");
 
-  // const customeMenu = Menu.buildFromTemplate([]);
-  // Menu.setApplicationMenu(customeMenu);
+  const customeMenu = Menu.buildFromTemplate([]);
+  Menu.setApplicationMenu(customeMenu);
 };
 
 app.whenReady().then(() => {
@@ -42,8 +42,11 @@ ipcMain.handle("get-time", () => {
   const day = timestamp.toLocaleDateString();
   const time = [timestamp.getHours(), timestamp.getMinutes()];
   const date = timestamp.toLocaleString();
+  const localStorageDate = new Date(
+    Date.now() - 3600 * 6 * 1000
+  ).toLocaleDateString();
 
-  return { day, time, date };
+  return { day, time, date, localStorageDate };
 });
 
 app.on("window-all-closed", () => {

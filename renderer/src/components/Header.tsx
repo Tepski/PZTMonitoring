@@ -11,16 +11,16 @@ interface HeaderProps {
   setModel: React.Dispatch<React.SetStateAction<tableProps | null>>;
 }
 
-interface FinalDataInterface {
-  TrayNumber: string | null;
-  Quantity: number | string | null;
-  Timestamp: string;
-}
+// interface FinalDataInterface {
+//   TrayNumber: string | null;
+//   Quantity: number | string | null;
+//   Timestamp: string;
+// }
 
 const finalDataDefaultValue: FinalDataInterface = {
   TrayNumber: "",
-  Quantity: null,
-  Timestamp: "",
+  Quantity: 0,
+  TimeStamp: "",
 };
 
 const Header = ({
@@ -51,70 +51,76 @@ const Header = ({
     ref.current?.focus();
   };
 
-  const loggingFunc = async (value: string | number) => {
-    const date: TimeProps | undefined = await getTime();
-    const time = date?.time[0];
+  const loggingFunc = useCallback(
+    async (value: string | number) => {
+      const date: TimeProps | undefined = await getTime();
+      const time = date?.time[0];
 
-    if (table) {
-      const newTable: tableProps = [...table];
-      const index = Number(time) - 5;
-      newTable[1][index] += value;
+      const setToLocal = async (value: string) => {
+        localStorage.setItem(date ? date.localStorageDate : "", value);
 
-      setTable(() => {
-        return newTable;
-      });
-    }
+        console.log(value);
+      };
 
-    if (total) {
-      const newTotal: totalProps = [...total];
-      const index = shift ? 0 : 1;
-      if (typeof newTotal[1][index] === "number") {
-        let updatedTotal = table
-          ? (newTotal[1][index] as unknown as number)
-          : 0;
-        updatedTotal = updatedTotal + (value as number);
-        newTotal[1][index] = updatedTotal;
-        setTotal(() => {
-          return newTotal;
+      if (table) {
+        const newTable: tableProps = [...table];
+        const index = Number(time) - 5;
+        newTable[1][index] += value;
+
+        setTable(() => {
+          return newTable;
         });
       }
-    }
 
-    const dataToStore = {
-      table: table ? [table[1], table[2]] : null,
-      total: total ? total[1] : null,
-      model: model ? [model[1], model[2]] : null,
-      hourly: finalData ? finalData : null,
-    };
+      if (total) {
+        const newTotal: totalProps = [...total];
+        const index = shift ? 0 : 1;
+        if (typeof newTotal[1][index] === "number") {
+          let updatedTotal = table ? (newTotal[1][index] as number) : 0;
+          updatedTotal = updatedTotal + (value as number);
+          newTotal[1][index] = updatedTotal;
+          setTotal(() => {
+            return newTotal;
+          });
+        }
+      }
 
-    const stringed = JSON.stringify(dataToStore);
+      const hourly = localStorage.getItem(date ? date.localStorageDate : "");
+      let hrlyArr: localItemProps | undefined = undefined;
+      if (hourly) {
+        hrlyArr = JSON.parse(hourly);
+        hrlyArr?.hourly.push(finalData);
 
-    setToLocal(stringed);
-  };
+        console.log("HourlyFound", hrlyArr);
+      } else {
+        console.log("No hourly found");
+      }
 
-  const enterDeps = [setScanned, setFinalData, finalData];
+      const dataToStore = {
+        table: table ? [table[1], table[2]] : null,
+        total: total ? total[1] : null,
+        model: model ? [model[1], model[2]] : null,
+        hourly: hrlyArr ? hrlyArr.hourly : [finalData],
+      };
+
+      const stringed = JSON.stringify(dataToStore);
+
+      setToLocal(stringed);
+    },
+    [finalData, getTime, model, setTable, setTotal, shift, table, total]
+  );
+
+  // const enterDeps = [setScanned, setFinalData, finalData];
 
   const handleEnter = useCallback(() => {
     setScanned((prev) => !prev);
 
     loggingFunc(Number(finalData?.Quantity ?? ""));
 
-    // setFinalData((prev) => ({
-    //   ...prev,
-    //   TrayNumber: "",
-    // }));
-
     if (ref.current) {
       ref.current.value = "";
     }
-
-    // loggingFunc(finalData?.Quantity ?? "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, enterDeps);
-
-  // const handleLocalStorage = (): void => {
-  //   return
-  // }
+  }, [finalData, loggingFunc]);
 
   const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const time: TimeProps | undefined = await getTime();
@@ -122,19 +128,12 @@ const Header = ({
     setFinalData((prev: FinalDataInterface) => ({
       ...prev,
       TrayNumber: e.target.value,
-      Timestamp: time?.day as string,
+      TimeStamp: time ? `${time.time[0]}:${time.time[1]}` : "",
     }));
   };
 
-  const setToLocal = async (value: string) => {
-    const time: TimeProps | undefined = await getTime();
-    localStorage.setItem(time ? time.day : "", value);
-
-    console.log(value);
-  };
-
   const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFinalData((prev) => ({ ...prev, Quantity: e.target.value }));
+    setFinalData((prev) => ({ ...prev, Quantity: Number(e.target.value) }));
   };
 
   useEffect(() => {
@@ -150,7 +149,7 @@ const Header = ({
     return () => {
       window.removeEventListener("keydown", scannerListener);
     };
-  }, [finalData]);
+  }, []);
 
   useEffect(() => {
     if (scanned) {
@@ -171,8 +170,8 @@ const Header = ({
   }, [scanned, handleEnter]);
 
   return (
-    <div className="flex justify-between pb-2 items-center">
-      <div className="">
+    <div className="flex justify-between py-2 items-center">
+      <div className="w-1/3">
         <input
           ref={ref}
           type="text"
@@ -183,15 +182,19 @@ const Header = ({
         />
       </div>
 
-      <div className="flex gap-2">
+      <div>
+        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600">PZT Output monitoring</p>
+      </div>
+
+      <div className="flex w-1/3 justify-end">
         <input
           type="date"
           className="border-2 px-2 py-1 rounded-md"
-          defaultValue={"08/04/2025"}
+          defaultValue={new Date().toISOString().split("T")[0]}
         />
 
         <button
-          className="bg-blue-500 mx-2 px-2 py-1 border-2 border-blue-500 shadow-md active:bg-blue-600 rounded-md hover:cursor-pointer text-white"
+          className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90 rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white"
           onClick={() => loggingFunc(finalData?.Quantity ?? "")}
         >
           Download Report
@@ -228,7 +231,7 @@ const Header = ({
               <div className="flex w-full justify-between items-center">
                 <p className="font-semibold">Timestamp:</p>
                 <p className="text-sm">
-                  {finalData?.Timestamp ? finalData.Timestamp : "07:00"}
+                  {finalData?.TimeStamp ? finalData.TimeStamp : "07:00"}
                 </p>
               </div>
             </div>

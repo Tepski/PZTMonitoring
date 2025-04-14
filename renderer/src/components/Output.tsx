@@ -23,16 +23,16 @@ const Output = ({ table }: OutputProps) => {
   // }, [table]);
 
   return (
-    <div className="flex h-full flex-1/4 rounded-2xl mb-2 overflow-hidden border-1 border-gray-800 shadow-sm shadow-black/50 bg-[#f7f7f7]">
+    <div className="flex h-full flex-1/4 rounded-2xl mb-2 overflow-hidden shadow-sm shadow-black/50 bg-[#ffffff]">
       <table className="w-full table-fixed h-full">
-        <thead className="bg-blue-400/40">
+        <thead className="bg-[#4f52b2]">
           <tr>
             {table &&
               table[0].map((head, headIndex) => {
                 return (
                   <th
                     key={headIndex.toString()}
-                    className={`bordasder-l-1 text-gray-500 font-semibold text-xs border-gray-500 py-1 ${
+                    className={`text-gray-300 font-semibold text-xs py-1 ${
                       headIndex == 0 && "text-left border-none ps-4"
                     }`}
                   >
@@ -48,7 +48,7 @@ const Output = ({ table }: OutputProps) => {
               return (
                 <tr
                   key={rowIndex.toString()}
-                  className={`font-semibold h-12  text-lg hover:bg-gray-200/50`}
+                  className={`font-semibold h-12  text-lg hover:bg-gray-200/20`}
                 >
                   {row.map((cell, colIndex) => {
                     return (
