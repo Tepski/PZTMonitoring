@@ -75,7 +75,7 @@ function App() {
 
     if (data) {
       if (table) {
-        const newTable = [...table];
+        const newTable = table.map(row => [...row]);
         newTable[1] = data.table[0];
         newTable[2] = data.table[1];
 
@@ -83,14 +83,14 @@ function App() {
       }
 
       if (tableTotal) {
-        const newTable = [...tableTotal];
+        const newTable = tableTotal.map(row => [...row]);
         newTable[1] = data.total;
 
         setTableTotal(newTable as totalProps);
       }
 
       if (tableModel) {
-        const newTable = [...tableModel];
+        const newTable = tableModel.map(row => [...row]);
         newTable[1] = data.model[0];
         newTable[2] = data.model[1];
 
@@ -108,7 +108,15 @@ function App() {
 
     const interval = setInterval(() => {
       getTime().then((time) => {
-        setDayShift(time?.time[0] == 18 ? false : true);
+        if (time?.time[0] == 18) {
+          setDayShift(false)
+        } else if (time?.time[0] == 6) {
+          setDayShift(true)
+          console.log("Another day, another trabahong gagawin")
+          setTable(tableDefault);
+          setTableTotal(tableTotalDefault);
+          setTableModel(tableModelDefault);
+        }
       });
     }, 1000);
 

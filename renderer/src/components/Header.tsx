@@ -11,12 +11,6 @@ interface HeaderProps {
   setModel: React.Dispatch<React.SetStateAction<tableProps | null>>;
 }
 
-// interface FinalDataInterface {
-//   TrayNumber: string | null;
-//   Quantity: number | string | null;
-//   Timestamp: string;
-// }
-
 const finalDataDefaultValue: FinalDataInterface = {
   TrayNumber: "",
   Quantity: 0,
@@ -37,6 +31,9 @@ const Header = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   const [scanned, setScanned] = useState<boolean>(false);
+  const [prevValue, setPrevValue] = useState<number>(0);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [onEdit, setOnEdit] = useState<boolean>(false);
   const [finalData, setFinalData] = useState<FinalDataInterface>(
     finalDataDefaultValue
   );
@@ -110,17 +107,40 @@ const Header = ({
     [finalData, getTime, model, setTable, setTotal, shift, table, total]
   );
 
-  // const enterDeps = [setScanned, setFinalData, finalData];
+  const handleDeleteLocal = async () => {
+    const time: TimeProps | undefined = await getTime();
+    localStorage.removeItem(time ? time.day : "");
+  };
+
+  const handleEdit = () => {
+    setScanned(true);
+    setOnEdit(true);
+  };
 
   const handleEnter = useCallback(() => {
     setScanned((prev) => !prev);
+    if (!onEdit) {
+      loggingFunc(Number(finalData?.Quantity ?? ""));
 
-    loggingFunc(Number(finalData?.Quantity ?? ""));
+      setPrevValue(finalData.Quantity);
+
+      ref.current?.focus();
+    } else {
+      console.log("on edit mode");
+      const valueToAdd: number = finalData.Quantity - prevValue;
+
+      loggingFunc(valueToAdd);
+      const setPrev: number = prevValue + (finalData.Quantity - prevValue);
+      setPrevValue(setPrev);
+
+      console.log(finalData.Quantity, prevValue);
+      setOnEdit(false);
+    }
 
     if (ref.current) {
       ref.current.value = "";
     }
-  }, [finalData, loggingFunc]);
+  }, [finalData, loggingFunc, onEdit, prevValue]);
 
   const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const time: TimeProps | undefined = await getTime();
@@ -134,6 +154,7 @@ const Header = ({
 
   const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFinalData((prev) => ({ ...prev, Quantity: Number(e.target.value) }));
+    setInputValue(e.target.value);
   };
 
   useEffect(() => {
@@ -150,6 +171,12 @@ const Header = ({
       window.removeEventListener("keydown", scannerListener);
     };
   }, []);
+
+  useEffect(() => {
+    if (prevValue != 0) {
+      setInputValue(prevValue.toString());
+    }
+  }, [prevValue]);
 
   useEffect(() => {
     if (scanned) {
@@ -171,19 +198,32 @@ const Header = ({
 
   return (
     <div className="flex justify-between py-2 items-center">
-      <div className="w-1/3">
+      <div className="w-1/3 flex items-center gap-4">
         <input
           ref={ref}
           type="text"
           // value={finalData && finalData.TrayNumber}
           onChange={(e) => handleChange(e)}
-          className="border-2 px-2 py-1 rounded-md caret-transparent"
+          className="border-2 px-2 py-1 rounded-md caret-transparent focus:bg-white"
           placeholder="Scan JO Batch Barcode"
         />
+        {prevValue != 0 && (
+          <p
+            className="text-sm text-gray-500 hover:text-shadow-xs hover:text-shadow-black/20 hover:cursor-pointer active:opacity-80"
+            onClick={handleEdit}
+          >
+            Edit previous value
+          </p>
+        )}
       </div>
 
       <div>
-        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600">PZT Output monitoring</p>
+        <p
+          className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600"
+          onClick={handleDeleteLocal}
+        >
+          PZT Output monitoring
+        </p>
       </div>
 
       <div className="flex w-1/3 justify-end">
@@ -195,7 +235,7 @@ const Header = ({
 
         <button
           className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90 rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white"
-          onClick={() => loggingFunc(finalData?.Quantity ?? "")}
+          onClick={handleEdit}
         >
           Download Report
         </button>
@@ -208,21 +248,17 @@ const Header = ({
         >
           <div className="w-1/4 bg-white shadow-lg shadow-black/60 rounded-2xl p-4 flex flex-col relative pb-20">
             <input
-              type="number"
+              // type="number"
               ref={inputRef}
+              value={inputValue}
               className="border-2 border-gray-400 rounded-lg px-4 h-20 text-xl text-gray-600 bg-gray-100"
               onChange={(e) => handleQuantityChange(e)}
               placeholder="Enter Quantity"
-              style={{
-                WebkitAppearance: "none",
-                // MozAppearance: "textfield",
-                // appearance: "none",
-              }}
             />
 
             <div className="flex items-center w-full flex-col text-lg text-gray-500 py-4 gap-4">
               <div className="flex w-full justify-between items-center">
-                <p className="font-semibold">TrayNumber: </p>
+                <p className="font-semibold">JO Batch: </p>
                 <p className="text-sm">
                   {finalData?.TrayNumber ? finalData.TrayNumber : "N17252"}
                 </p>

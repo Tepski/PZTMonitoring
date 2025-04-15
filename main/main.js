@@ -25,8 +25,8 @@ const createWindow = () => {
   // win.loadFile(buildPath);
   win.loadURL("http://localhost:5173/");
 
-  const customeMenu = Menu.buildFromTemplate([]);
-  Menu.setApplicationMenu(customeMenu);
+  // const customeMenu = Menu.buildFromTemplate([]);
+  // Menu.setApplicationMenu(customeMenu);
 };
 
 app.whenReady().then(() => {

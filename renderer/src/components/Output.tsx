@@ -48,7 +48,7 @@ const Output = ({ table }: OutputProps) => {
               return (
                 <tr
                   key={rowIndex.toString()}
-                  className={`font-semibold h-12  text-lg hover:bg-gray-200/20`}
+                  className={`font-semibold h-12 hover:bg-gray-200/20`}
                 >
                   {row.map((cell, colIndex) => {
                     return (
