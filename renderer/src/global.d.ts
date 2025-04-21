@@ -11,6 +11,10 @@ declare global {
   interface Window {
     electronApi: {
       getTime: () => TimeProps;
+      fullscreen: (res: boolean) => void;
+      minimize: () => void;
+      maximize: () => boolean;
+      winClose: () => void;
     };
   }
 

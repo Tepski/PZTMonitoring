@@ -3,14 +3,15 @@ const path = require("path");
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 900,
+    icon: path.join(__dirname, "../renderer/src/assets/npi.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: true,
     },
-    // fullscreen: true,
+    frame: false,
   });
 
   const buildPath = path.join(
@@ -25,8 +26,41 @@ const createWindow = () => {
   // win.loadFile(buildPath);
   win.loadURL("http://localhost:5173/");
 
-  // const customeMenu = Menu.buildFromTemplate([]);
-  // Menu.setApplicationMenu(customeMenu);
+  ipcMain.on("fullscreen", (res) => {
+    if (win.fullScreen) {
+      win.fullScreen = false;
+      return;
+    }
+
+    win.fullScreen = true;
+  });
+
+  ipcMain.on("minimize", () => {
+    win.minimize();
+  });
+
+  ipcMain.on("maximize", () => {
+    if (win.isMaximized()) {
+      win.restore();
+
+      return false;
+    } else {
+      win.maximize();
+
+      return true;
+    }
+  });
+
+  ipcMain.on("winClose", () => {
+    win.close();
+  });
+
+  ipcMain.on("restore", () => {
+    win.restore();
+  });
+
+  const customeMenu = Menu.buildFromTemplate([]);
+  Menu.setApplicationMenu(customeMenu);
 };
 
 app.whenReady().then(() => {

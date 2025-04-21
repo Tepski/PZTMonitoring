@@ -107,10 +107,10 @@ const Header = ({
     [finalData, getTime, model, setTable, setTotal, shift, table, total]
   );
 
-  const handleDeleteLocal = async () => {
-    const time: TimeProps | undefined = await getTime();
-    localStorage.removeItem(time ? time.day : "");
-  };
+  // const handleDeleteLocal = async () => {
+  //   const time: TimeProps | undefined = await getTime();
+  //   localStorage.removeItem(time ? time.day : "");
+  // };
 
   const handleEdit = () => {
     setScanned(true);
@@ -197,7 +197,7 @@ const Header = ({
   }, [scanned, handleEnter]);
 
   return (
-    <div className="flex justify-between py-2 items-center">
+    <div className="flex justify-between pb-2 py-10 items-center">
       <div className="w-1/3 flex items-center gap-4">
         <input
           ref={ref}
@@ -218,10 +218,7 @@ const Header = ({
       </div>
 
       <div>
-        <p
-          className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600"
-          onClick={handleDeleteLocal}
-        >
+        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600">
           PZT Output monitoring
         </p>
       </div>
@@ -233,10 +230,7 @@ const Header = ({
           defaultValue={new Date().toISOString().split("T")[0]}
         />
 
-        <button
-          className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90 rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white"
-          onClick={handleEdit}
-        >
+        <button className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90 rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white">
           Download Report
         </button>
       </div>
@@ -260,14 +254,14 @@ const Header = ({
               <div className="flex w-full justify-between items-center">
                 <p className="font-semibold">JO Batch: </p>
                 <p className="text-sm">
-                  {finalData?.TrayNumber ? finalData.TrayNumber : "N17252"}
+                  {finalData?.TrayNumber ? finalData.TrayNumber : ""}
                 </p>
               </div>
 
               <div className="flex w-full justify-between items-center">
                 <p className="font-semibold">Timestamp:</p>
                 <p className="text-sm">
-                  {finalData?.TimeStamp ? finalData.TimeStamp : "07:00"}
+                  {finalData?.TimeStamp ? finalData.TimeStamp : ""}
                 </p>
               </div>
             </div>

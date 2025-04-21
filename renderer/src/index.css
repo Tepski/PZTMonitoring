@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.navBarTitle {
+  -webkit-app-region: drag;
+}
+
+.navBarButtons {
+  -webkit-app-region: no-drag;
+}

@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Output from "./components/Output";
 import TotalOutput from "./components/TotalOutput";
 import PerModel from "./components/PerModel";
+import NavBar from "./components/NavBar";
 
 // Use colors #ebebeb and #daebec
 
@@ -47,7 +48,7 @@ function App() {
     tableModelDefault
   );
   const [dayshift, setDayShift] = useState<boolean>(true);
-
+  const [FS, setFS] = useState<boolean>(false);
   const getTime = async (): Promise<TimeProps | undefined> => {
     try {
       const res = await window.electronApi.getTime();
@@ -75,7 +76,7 @@ function App() {
 
     if (data) {
       if (table) {
-        const newTable = table.map(row => [...row]);
+        const newTable = table.map((row) => [...row]);
         newTable[1] = data.table[0];
         newTable[2] = data.table[1];
 
@@ -83,14 +84,14 @@ function App() {
       }
 
       if (tableTotal) {
-        const newTable = tableTotal.map(row => [...row]);
+        const newTable = tableTotal.map((row) => [...row]);
         newTable[1] = data.total;
 
         setTableTotal(newTable as totalProps);
       }
 
       if (tableModel) {
-        const newTable = tableModel.map(row => [...row]);
+        const newTable = tableModel.map((row) => [...row]);
         newTable[1] = data.model[0];
         newTable[2] = data.model[1];
 
@@ -109,10 +110,10 @@ function App() {
     const interval = setInterval(() => {
       getTime().then((time) => {
         if (time?.time[0] == 18) {
-          setDayShift(false)
+          setDayShift(false);
         } else if (time?.time[0] == 6) {
-          setDayShift(true)
-          console.log("Another day, another trabahong gagawin")
+          setDayShift(true);
+          console.log("Another day, another trabahong gagawin");
           setTable(tableDefault);
           setTableTotal(tableTotalDefault);
           setTableModel(tableModelDefault);
@@ -151,6 +152,26 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setTable]);
 
+  const handleFullScreen = useCallback(async (e: KeyboardEvent) => {
+    if (e.key == "F11") {
+      if (FS) {
+        window.electronApi.fullscreen(false);
+        setFS(false);
+      } else {
+        window.electronApi.fullscreen(true);
+        setFS(true);
+      }
+    }
+  }, [setFS, FS]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleFullScreen);
+
+    return () => {
+      window.removeEventListener("keydown", handleFullScreen);
+    };
+  }, [handleFullScreen]);
+
   useEffect(() => {
     if (!dayshift) {
       updateTableOnChangeShift();
@@ -164,8 +185,8 @@ function App() {
         <div className="h-full w-1/5 bg-gradient-to-r from-[#e5e7e4] to-[#daebec]"></div>
         <div className="h-full w-2/5 bg-[#daebec]"></div>
       </div>
-      {/* <TitleBar /> */}
       <div className="container flex flex-col h-full w-[97%] pb-4 z-10">
+        <NavBar FS={FS} />
         <Header
           shift={dayshift}
           getTime={getTime}
