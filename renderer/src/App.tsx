@@ -159,10 +159,13 @@ function App() {
 
   return (
     <div className="flex h-[100vh] w-[100vw] flex-col items-center select-none relative bg-gradient-to-rs from-[#e5e7e4]s to-[#daebec]s">
-      <div className="w-full h-full bg-red-200/40 absolute top-0 left-0 flex z-0">
-        <div className="h-full w-2/5 bg-[#e5e7e4]"></div>
-        <div className="h-full w-1/5 bg-gradient-to-r from-[#e5e7e4] to-[#daebec]"></div>
-        <div className="h-full w-2/5 bg-[#daebec]"></div>
+      <div className="w-full h-full absolute flex-col top-0 left-0 flex z-0">
+        {/* <div className="w-full h-2/5 bg-[#e5e7e4]"></div>
+        <div className="w-full h-1/5 bg-gradient-to-r from-[#e5e7e4] to-[#daebec]"></div>
+        <div className="w-full h-2/5 bg-[#daebec]"></div> */}
+        <div className="w-full h-1/6 bg-[#e5e7e4]"></div>
+        <div className="w-full h-1/6 bg-gradient-to-t from-[#aee6d9] to-[#e5e7e4]"></div>
+        <div className="w-full h-2/3 bg-[#aee6d9]"></div>
       </div>
       {/* <TitleBar /> */}
       <div className="container flex flex-col h-full w-[97%] pb-4 z-10">

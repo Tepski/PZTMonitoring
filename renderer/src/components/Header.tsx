@@ -123,8 +123,6 @@ const Header = ({
       loggingFunc(Number(finalData?.Quantity ?? ""));
 
       setPrevValue(finalData.Quantity);
-
-      ref.current?.focus();
     } else {
       console.log("on edit mode");
       const valueToAdd: number = finalData.Quantity - prevValue;
@@ -137,6 +135,7 @@ const Header = ({
       setOnEdit(false);
     }
 
+    ref.current?.focus();
     if (ref.current) {
       ref.current.value = "";
     }
