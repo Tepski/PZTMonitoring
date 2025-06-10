@@ -29,14 +29,18 @@ const Header = ({
   const ref = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
 
   const [scanned, setScanned] = useState<boolean>(false);
   const [prevValue, setPrevValue] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>("");
   const [onEdit, setOnEdit] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const [finalData, setFinalData] = useState<FinalDataInterface>(
     finalDataDefaultValue
   );
+
+  let tempArr: (string | number)[][] = [];
 
   // Cancel Function
   const cancel = () => {
@@ -107,10 +111,44 @@ const Header = ({
     [finalData, getTime, model, setTable, setTotal, shift, table, total]
   );
 
-  // const handleDeleteLocal = async () => {
-  //   const time: TimeProps | undefined = await getTime();
-  //   localStorage.removeItem(time ? time.day : "");
-  // };
+  const handleGetDate = async (dateStr: string) => {
+    const date_ = selectedDate.split("-");
+    const newDate = dateStr;
+
+    console.log(newDate);
+    const new_date = `${parseInt(date_[1])}/${parseInt(date_[2])}/${date_[0]}`;
+
+    const res: string | null = localStorage.getItem(new_date);
+    if (res) {
+      const parsedRes = JSON.parse(res);
+
+      const hrly: FinalDataInterface[] = parsedRes["hourly"];
+
+      for (const x of hrly) {
+        const data_arr: (string | number)[] = [
+          new_date,
+          x["TimeStamp"],
+          x["TrayNumber"],
+          x["Quantity"],
+        ];
+        try {
+          await window.electronApi.getDate(data_arr);
+          if (tempArr) {
+            for (const d of tempArr) {
+              await window.electronApi.getDate(d);
+            }
+
+            tempArr = [];
+          }
+          console.log("Success");
+        } catch {
+          tempArr.push(data_arr);
+
+          console.log(tempArr);
+        }
+      }
+    }
+  };
 
   const handleEdit = () => {
     setScanned(true);
@@ -158,6 +196,8 @@ const Header = ({
   };
 
   useEffect(() => {
+    setSelectedDate(dateRef.current ? dateRef.current.value : "");
+
     const scannerListener = (e: KeyboardEvent) => {
       if (e.key == "ArrowDown") {
         setScanned((prev) => !prev);
@@ -226,11 +266,16 @@ const Header = ({
       <div className="flex w-1/3 justify-end">
         <input
           type="date"
+          ref={dateRef}
           className="border-2 px-2 py-1 rounded-md"
           defaultValue={new Date().toISOString().split("T")[0]}
+          onChange={(e) => setSelectedDate(e.target.value)}
         />
 
-        <button className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90 rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white">
+        <button
+          className="bg-[#4f52b2] ms-2 px-2 py-1 border-2 border-[#4f52b2] hover:bg-[#4649a0] shadow-sm active:opacity-90     rounded-md hover:cursor-pointer hover:shadow-md hover:shadow-black/50 transition-shadow ease-linear text-white"
+          onClick={() => handleGetDate("Help")}
+        >
           Download Report
         </button>
       </div>
@@ -238,7 +283,7 @@ const Header = ({
       {scanned && (
         <div
           ref={modalRef}
-          className="h-full w-full place-self-center absolute left-0 top-0 bg-black/10 justify-self-center flex justify-center items-center"
+          className="h-full w-full place-self-center absolute left-0 top-0 bg-black/10 justify-ktself-center flex justify-center items-center"
         >
           <div className="w-1/4 bg-white shadow-lg shadow-black/60 rounded-2xl p-4 flex flex-col relative pb-20">
             <input

@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld("electronApi", {
   maximize: () => ipcRenderer.send("maximize"),
   winClose: () => ipcRenderer.send("winClose"),
   restore: () => ipcRenderer.send("restore"),
+  getDate: (data) => ipcRenderer.invoke("getDate", data),
+  showAlert: (data) => ipcRenderer.invoke("showAlert", data),
 });
-l

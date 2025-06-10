@@ -49,6 +49,7 @@ function App() {
   );
   const [dayshift, setDayShift] = useState<boolean>(true);
   const [FS, setFS] = useState<boolean>(false);
+  
   const getTime = async (): Promise<TimeProps | undefined> => {
     try {
       const res = await window.electronApi.getTime();
@@ -152,17 +153,20 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setTable]);
 
-  const handleFullScreen = useCallback(async (e: KeyboardEvent) => {
-    if (e.key == "F11") {
-      if (FS) {
-        window.electronApi.fullscreen(false);
-        setFS(false);
-      } else {
-        window.electronApi.fullscreen(true);
-        setFS(true);
+  const handleFullScreen = useCallback(
+    async (e: KeyboardEvent) => {
+      if (e.key == "F11") {
+        if (FS) {
+          window.electronApi.fullscreen(false);
+          setFS(false);
+        } else {
+          window.electronApi.fullscreen(true);
+          setFS(true);
+        }
       }
-    }
-  }, [setFS, FS]);
+    },
+    [setFS, FS]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleFullScreen);

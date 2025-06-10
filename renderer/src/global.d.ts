@@ -15,6 +15,8 @@ declare global {
       minimize: () => void;
       maximize: () => boolean;
       winClose: () => void;
+      getDate: (data: (string | number)[]) => void;
+      showAlert: (data: { title: string; message: string }) => void;
     };
   }
 

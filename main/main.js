@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
+const ExcelJS = require("exceljs");
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -13,6 +14,8 @@ const createWindow = () => {
     },
     frame: false,
   });
+
+  win.webContents.openDevTools({ mode: "detach" });
 
   const buildPath = path.join(
     __dirname,
@@ -81,6 +84,29 @@ ipcMain.handle("get-time", () => {
   ).toLocaleDateString();
 
   return { day, time, date, localStorageDate };
+});
+
+ipcMain.handle("showAlert", async (event, { title, message }) => {
+  await dialog.showMessageBox({
+    type: "info",
+    title: title || "Default title",
+    message: message || "Defaul Message",
+    buttons: ["OK"],
+  });
+});
+
+ipcMain.handle("getDate", async (event, data) => {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(
+    "D:/Programming/Electron/PZTMonitoring/renderer/src/assets/Template.xlsx"
+  );
+
+  const ws = wb.getWorksheet("Total Output");
+  ws.addRow(data);
+
+  await wb.xlsx.writeFile(
+    "D:/Programming/Electron/PZTMonitoring/renderer/src/assets/Template.xlsx"
+  );
 });
 
 app.on("window-all-closed", () => {
