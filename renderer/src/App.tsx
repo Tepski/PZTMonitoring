@@ -5,6 +5,7 @@ import Output from "./components/Output";
 import TotalOutput from "./components/TotalOutput";
 import PerModel from "./components/PerModel";
 import NavBar from "./components/NavBar";
+import Modal from "./pages/Modal";
 
 // Use colors #ebebeb and #daebec
 
@@ -41,6 +42,7 @@ const tableModelDefault: tableProps = [
 
 function App() {
   const [table, setTable] = useState<tableProps | null>(tableDefault);
+  const [warningSent, setWarningSent] = useState<boolean>(true);
   const [tableTotal, setTableTotal] = useState<totalProps | null>(
     tableTotalDefault
   );
@@ -49,7 +51,7 @@ function App() {
   );
   const [dayshift, setDayShift] = useState<boolean>(true);
   const [FS, setFS] = useState<boolean>(false);
-  
+
   const getTime = async (): Promise<TimeProps | undefined> => {
     try {
       const res = await window.electronApi.getTime();
@@ -114,7 +116,7 @@ function App() {
           setDayShift(false);
         } else if (time?.time[0] == 6) {
           setDayShift(true);
-          console.log("Another day, another trabahong gagawin");
+          // console.log("Another day, another trabahong gagawin");
           setTable(tableDefault);
           setTableTotal(tableTotalDefault);
           setTableModel(tableModelDefault);
@@ -190,6 +192,7 @@ function App() {
         <div className="h-full w-2/5 bg-[#daebec]"></div>
       </div>
       <div className="container flex flex-col h-full w-[97%] pb-4 z-10">
+        {warningSent && <Modal setWarningSet={setWarningSent} />}
         <NavBar FS={FS} />
         <Header
           shift={dayshift}
@@ -200,6 +203,8 @@ function App() {
           setTable={setTable}
           setTotal={setTableTotal}
           setModel={setTableModel}
+          warningSent={warningSent}
+          setWarningSent={setWarningSent}
         />
         <TotalOutput table={tableTotal} />
         <Output table={table} />

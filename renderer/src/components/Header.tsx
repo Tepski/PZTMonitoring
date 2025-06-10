@@ -6,6 +6,8 @@ interface HeaderProps {
   table: tableProps | null;
   total: totalProps | null;
   model: tableProps | null;
+  warningSent: boolean;
+  setWarningSent: React.Dispatch<React.SetStateAction<boolean>>;
   setTable: React.Dispatch<React.SetStateAction<tableProps | null>>;
   setTotal: React.Dispatch<React.SetStateAction<totalProps | null>>;
   setModel: React.Dispatch<React.SetStateAction<tableProps | null>>;
@@ -25,12 +27,15 @@ const Header = ({
   model,
   setTotal,
   shift,
+  warningSent,
+  setWarningSent,
 }: HeaderProps) => {
   const ref = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
 
+  const [alreadySent, setAlreadySent] = useState<boolean>(false);
   const [scanned, setScanned] = useState<boolean>(false);
   const [prevValue, setPrevValue] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>("");
@@ -40,7 +45,7 @@ const Header = ({
     finalDataDefaultValue
   );
 
-  let tempArr: (string | number)[][] = [];
+  const tempArrRef = useRef<(string | number)[][]>([]);
 
   // Cancel Function
   const cancel = () => {
@@ -52,15 +57,79 @@ const Header = ({
     ref.current?.focus();
   };
 
+  const handleGetDate = useCallback(
+    async (dateStr: string) => {
+      let new_date = dateStr;
+      const newDate = selectedDate.split("-");
+
+      if (dateStr.includes("-")) {
+        const dateList: string[] = dateStr.split("-");
+        new_date = `${dateList[1]}/${dateList[2]}/${dateList[0]}`;
+      }
+
+      console.log(newDate);
+      // const new_date = `${parseInt(date_[1])}/${parseInt(date_[2])}/${date_[0]}`;
+
+      console.log(new_date);
+
+      const res: string | null = localStorage.getItem(new_date);
+      if (res) {
+        const parsedRes = JSON.parse(res);
+
+        const hrly: FinalDataInterface[] = parsedRes["hourly"];
+
+        for (const x of hrly) {
+          const data_arr: (string | number)[] = [
+            new_date,
+            x["TimeStamp"],
+            x["TrayNumber"],
+            x["Quantity"],
+          ];
+          try {
+            setAlreadySent(false);
+            await window.electronApi.getDate(data_arr);
+            if (tempArrRef.current.length > 0) {
+              for (const d of tempArrRef.current) {
+                await window.electronApi.getDate(d);
+              }
+
+              tempArrRef.current = [];
+            }
+            console.log("Success");
+          } catch {
+            if (!alreadySent) {
+              setWarningSent(true);
+              setAlreadySent(true);
+            }
+
+            console.log(warningSent ? "Warning Sent" : "Warning not sent");
+            tempArrRef.current.push(data_arr);
+
+            console.log(tempArrRef.current);
+          }
+        }
+      }
+    },
+    [selectedDate, setWarningSent, warningSent, alreadySent]
+  );
+
   const loggingFunc = useCallback(
     async (value: string | number) => {
       const date: TimeProps | undefined = await getTime();
       const time = date?.time[0];
 
       const setToLocal = async (value: string) => {
-        localStorage.setItem(date ? date.localStorageDate : "", value);
+        let dateStr: string = "";
 
-        console.log(value);
+        if (date) {
+          dateStr = date.localStorageDate;
+        }
+
+        localStorage.setItem(dateStr, value);
+
+        handleGetDate(dateStr);
+
+        console.log(value, dateStr);
       };
 
       if (table) {
@@ -108,47 +177,18 @@ const Header = ({
 
       setToLocal(stringed);
     },
-    [finalData, getTime, model, setTable, setTotal, shift, table, total]
+    [
+      finalData,
+      getTime,
+      model,
+      setTable,
+      setTotal,
+      shift,
+      table,
+      total,
+      handleGetDate,
+    ]
   );
-
-  const handleGetDate = async (dateStr: string) => {
-    const date_ = selectedDate.split("-");
-    const newDate = dateStr;
-
-    console.log(newDate);
-    const new_date = `${parseInt(date_[1])}/${parseInt(date_[2])}/${date_[0]}`;
-
-    const res: string | null = localStorage.getItem(new_date);
-    if (res) {
-      const parsedRes = JSON.parse(res);
-
-      const hrly: FinalDataInterface[] = parsedRes["hourly"];
-
-      for (const x of hrly) {
-        const data_arr: (string | number)[] = [
-          new_date,
-          x["TimeStamp"],
-          x["TrayNumber"],
-          x["Quantity"],
-        ];
-        try {
-          await window.electronApi.getDate(data_arr);
-          if (tempArr) {
-            for (const d of tempArr) {
-              await window.electronApi.getDate(d);
-            }
-
-            tempArr = [];
-          }
-          console.log("Success");
-        } catch {
-          tempArr.push(data_arr);
-
-          console.log(tempArr);
-        }
-      }
-    }
-  };
 
   const handleEdit = () => {
     setScanned(true);
@@ -258,7 +298,10 @@ const Header = ({
       </div>
 
       <div>
-        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600">
+        <p
+          className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-purple-600"
+          onClick={() => setWarningSent(warningSent ? false : true)}
+        >
           PZT Output monitoring
         </p>
       </div>
